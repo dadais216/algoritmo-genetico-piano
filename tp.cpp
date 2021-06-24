@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <algorithm>
 
-const int duracion=5;
-const int tempo=8;
+const int duracion=10;
+const int tempo=4;
 const int tamanoPoblacion=100;
 typedef int cancion[duracion*tempo];
 typedef cancion poblaciont[tamanoPoblacion];
@@ -51,14 +51,36 @@ int absDiff(int a,int b){
 
 int aptitud(int* c){
   int apt=0;
-  for(int p=4;p<=8;p+=2){
-    for(int i=0;i<duracion*tempo-4;i++){
-      apt+=absDiff(c[i],c[i+4])*p;
-    }
+
+  int p=8;
+  for(int i=0;i<duracion*tempo-p;i++){
+    apt-=absDiff(c[i],c[i+p])*8;
   }
-  for(int i=0;i<duracion*tempo-3;i++){
-    apt+=(absDiff(c[i],c[i+1])+absDiff(c[i],c[i+2]))==0?100:0;
+  for(int i=0;i<duracion*tempo-p*2;i++){
+    int diff=absDiff(c[i],c[i+p*2]);
+    apt-=diff>16?0:(16-diff)*1;
   }
+
+
+  int penta=0;
+  for(int i=0;i<duracion*tempo-1;i++){
+    int diff=c[i+1]-c[i];
+
+    int jmp=1;
+
+    //escala mayor
+    //if(penta==3||penta==6) jmp=2;
+
+    //escala menor
+    if(penta==1||penta==5) jmp=2;
+
+
+    penta++;
+    if(penta==7) penta=0;
+
+    apt-=absDiff(diff,4*jmp);
+  }
+  //apt+=up*6;
   return apt;
 }
 
@@ -68,11 +90,11 @@ void seleccion(){
     ranking[i].apt=aptitud((*poblacionAct)[i]);
   }
   std::sort(&ranking[0],&ranking[tamanoPoblacion],[](rank& a,rank& b)->bool{
-                                                      return a.apt<b.apt;
+                                                      return a.apt>b.apt;
                                                 });
   //printf("song %d apt %d\n",ranking[99].ind,ranking[99].apt);
   //play((*poblacionAct)[ranking[99].ind]);
-  if((iteracion<110&&iteracion%10==0)||(iteracion%1000==0)){
+  if(iteracion>0&&iteracion%50==0){
     printf("~~~%d~~~\n",iteracion);
     printf("song %d apt %d\n",ranking[0].ind,ranking[0].apt);
     play((*poblacionAct)[ranking[0].ind]);
