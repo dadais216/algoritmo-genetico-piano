@@ -52,35 +52,46 @@ int absDiff(int a,int b){
 int aptitud(int* c){
   int apt=0;
 
-  int p=8;
-  for(int i=0;i<duracion*tempo-p;i++){
-    apt-=absDiff(c[i],c[i+p])*8;
+  int loop=8;
+  for(int i=0;i<duracion*tempo-loop;i++){
+    apt-=absDiff(c[i],c[i+loop])*8;
   }
-  for(int i=0;i<duracion*tempo-p*2;i++){
-    int diff=absDiff(c[i],c[i+p*2]);
+  for(int i=0;i<duracion*tempo-loop*2;i++){
+    int diff=absDiff(c[i],c[i+loop*2]);
     apt-=diff>16?0:(16-diff)*1;
   }
 
 
-  int penta=0;
+  int scaleStep=0;
+  int scaleLimit;
   for(int i=0;i<duracion*tempo-1;i++){
     int diff=c[i+1]-c[i];
 
-    int jmp=1;
+    int jmp=2;
 
     //escala mayor
-    //if(penta==3||penta==6) jmp=2;
+    //if(scaleStep==3||scaleStep==6) jmp=4;
+    //scaleLimit=7;
 
     //escala menor
-    if(penta==1||penta==5) jmp=2;
+    if(scaleStep==1||scaleStep==5) jmp=4;
+    scaleLimit=7;
 
+    //escala lydian aug
+    //if(scaleStep==3) jmp=0;
+    //if(scaleStep==6||scaleStep==7) jmp=3;
+    //scaleLimit=8;
 
-    penta++;
-    if(penta==7) penta=0;
+    //escala cromatica
+    //if(scaleStep%2==0) jmp=1;
+    //if(scaleStep>=6) jmp*=-1;
+    //scaleLimit=12;
 
-    apt-=absDiff(diff,4*jmp);
+    scaleStep++;
+    scaleStep=scaleStep%scaleLimit;
+
+    apt-=absDiff(diff,2*jmp)*1;
   }
-  //apt+=up*6;
   return apt;
 }
 
